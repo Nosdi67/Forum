@@ -50,7 +50,11 @@ class ForumController extends AbstractController implements ControllerInterface{
         $categoryManager=new CategoryManager();
         $category=$categoryManager->findOneById($topic->getCategoryId());
         $postManager=new PostManager();
-        $post= $postManager->findPostsByTopicId($id);
+        $posts= $postManager->findPostsByTopicId($id);
+        $postTexts=[];
+        foreach ($posts as $post){
+            $postTexts[]=$post->getText();
+        }
         return [
             "view" => VIEW_DIR."forum/topicById.php",
             "meta_description" => "Détail d'un topic",
@@ -58,8 +62,14 @@ class ForumController extends AbstractController implements ControllerInterface{
                 "topic" => $topic,
                 "category" => $category,
                 "title" => $topic->getTitle(),
-                // "text"=> $post->getText()
+                "postTexts" => $postTexts
             ]
+        ];
+    }
+    public function backHomePage(){
+        return [
+            "view" => VIEW_DIR."home.php",
+            "meta_description" => "Page d'accueil du forum"
         ];
     }
 }
