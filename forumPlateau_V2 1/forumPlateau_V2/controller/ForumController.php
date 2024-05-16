@@ -7,6 +7,7 @@ use App\ControllerInterface;
 use Model\Managers\CategoryManager;
 use Model\Managers\TopicManager;
 use Model\Managers\PostManager;
+use Model\Managers\UserManager;
 
 class ForumController extends AbstractController implements ControllerInterface{
 
@@ -33,28 +34,28 @@ class ForumController extends AbstractController implements ControllerInterface{
         $categoryManager = new CategoryManager();
         $category = $categoryManager->findOneById($id);
         $topics = $topicManager->findTopicsByCategory($id);
+        
 
         return [
             "view" => VIEW_DIR."forum/listTopics.php",
             "meta_description" => "Liste des topics par catégorie : ".$category,
             "data" => [
                 "category" => $category,
-                "topics" => $topics
+                "topics" => $topics,
+                
             ]
         ];
     }
 
     public function openTopicByID($id) {
         $topicManager=new TopicManager();
-        $topic=$topicManager->findOneById($id);
-        $categoryManager=new CategoryManager();
-        $category=$categoryManager->findOneById($topic->getCategoryId());
         $postManager=new PostManager();
-        $posts= $postManager->findPostsByTopicId($id);
-        $postTexts=[];
-        foreach ($posts as $post){
-            $postTexts[]=$post->getText();
-        }
+        $categoryManager=new CategoryManager();
+        $userManager=new UserManager();
+        $topic=$topicManager->findOneById($id);
+        $posts=$postManager->findPostsByTopicId($id);
+        $category=$categoryManager->findOneById($topic->getCategoryId());
+        $users=$userManager->findAll();
         return [
             "view" => VIEW_DIR."forum/topicById.php",
             "meta_description" => "Détail d'un topic",
@@ -62,14 +63,73 @@ class ForumController extends AbstractController implements ControllerInterface{
                 "topic" => $topic,
                 "category" => $category,
                 "title" => $topic->getTitle(),
-                "postTexts" => $postTexts
+                "posts" => $posts
             ]
         ];
     }
+
+    
     public function backHomePage(){
         return [
             "view" => VIEW_DIR."home.php",
             "meta_description" => "Page d'accueil du forum"
         ];
+    }
+
+    public function toAdminPage(){
+        return [
+            "view" => VIEW_DIR."adminPage.php",
+            "meta_description" => "Page d'administration du forum"
+        ];
+    }
+
+    public function addCategory() {
+
+        $categoryManager = new CategoryManager();
+        if(isset($_POST["submit"])) {
+
+            $name = filter_input(INPUT_POST, "name", FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+            if($name) {
+                $categoryManager->add([
+                    "name" => $name
+                ]);
+
+                $this->redirectTo("forum", "index");
+            }
+        }
+    }
+
+    public function sendMessage($id){
+        $postManager = new PostManager();
+        $topicManager = new TopicManager();
+        $userManager = new UserManager();
+        $topicId= $topicManager->findOneById($id);
+        // $userId= $userManager->findOneById(1)->getId();
+
+        if(isset($_POST["submit"])){
+            $text = filter_input(INPUT_POST, "text", FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+          
+            if($text){
+                $postManager->add([
+                    "text" => $text,
+                    "topic_id" => $id,
+                    "user_id" => 1
+                ]);
+                $this->redirectTo("forum", "openTopicByID", $id);
+            }
+        }
+    }
+
+    public function addTopicAndFirstMessage($id) {
+        $topicManager = new TopicManager();
+        $postManager = new PostManager();
+        $categoryManager = new CategoryManager();
+        $userManager = new UserManager();
+        $categoryId = $categoryManager->findOneById($id);
+
+        if(isset($_POST["submit"])) {
+
+            $title = filter_input(INPUT_POST, "title", FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        }
     }
 }

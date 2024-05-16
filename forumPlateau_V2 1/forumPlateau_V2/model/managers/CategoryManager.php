@@ -13,4 +13,10 @@ class CategoryManager extends Manager{
     public function __construct(){
         parent::connect();
     }
+    public function addCategory($data) {
+       
+            $sql = "INSERT INTO category (name) VALUES (:name)";
+            DAO::insert($sql, $data);
+
+    }
 }

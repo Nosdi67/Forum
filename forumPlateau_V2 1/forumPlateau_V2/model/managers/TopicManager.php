@@ -19,12 +19,19 @@ class TopicManager extends Manager{
 
         $sql = "SELECT * 
                 FROM ".$this->tableName." t 
-                WHERE t.category_id = :id";
+                WHERE t.category_id = :id
+                ORDER BY t.creationDate DESC";
        
         // la requête renvoie plusieurs enregistrements --> getMultipleResults
         return  $this->getMultipleResults(
             DAO::select($sql, ['id' => $id]), 
             $this->className
         );
+    }
+
+    public function addTopic($data) {
+    
+        $sql="INSERT INTO ".$this->tableName." (title, category_id) VALUES (:name,:category_id)";
+        DAO::insert($sql,$data);
     }
 }
