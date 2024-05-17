@@ -54,22 +54,24 @@ class ForumController extends AbstractController implements ControllerInterface{
         $userManager=new UserManager();
         $topic=$topicManager->findOneById($id);
         $posts=$postManager->findPostsByTopicId($id);
-        $category=$categoryManager->findOneById($topic->getCategoryId());
-        $users=$userManager->findAll();
+        $category=$categoryManager->findOneById($id);
+        $users=$userManager->findOneById($id);
         return [
             "view" => VIEW_DIR."forum/topicById.php",
             "meta_description" => "Détail d'un topic",
             "data" => [
                 "topic" => $topic,
                 "category" => $category,
-                "title" => $topic->getTitle(),
-                "posts" => $posts
+                "title" => $topic,
+                "posts" => $posts,
+                "user" => $users
             ]
         ];
     }
 
     
     public function backHomePage(){
+        
         return [
             "view" => VIEW_DIR."home.php",
             "meta_description" => "Page d'accueil du forum"
@@ -77,9 +79,17 @@ class ForumController extends AbstractController implements ControllerInterface{
     }
 
     public function toAdminPage(){
+        $categoryManager = new CategoryManager();
+        $userManager = new UserManager();
+        $categories = $categoryManager->findAll(["name", "DESC"]);
+        $users = $userManager->findAll(["nickName", "DESC"]);
         return [
             "view" => VIEW_DIR."adminPage.php",
-            "meta_description" => "Page d'administration du forum"
+            "meta_description" => "Page d'administration du forum",
+            "data" => [
+                "categories" => $categories,
+                "users" => $users
+            ]
         ];
     }
 
@@ -120,16 +130,30 @@ class ForumController extends AbstractController implements ControllerInterface{
         }
     }
 
-    public function addTopicAndFirstMessage($id) {
+    public function addTopicAndFirstMessage() {
         $topicManager = new TopicManager();
         $postManager = new PostManager();
-        $categoryManager = new CategoryManager();
-        $userManager = new UserManager();
-        $categoryId = $categoryManager->findOneById($id);
-
-        if(isset($_POST["submit"])) {
-
+        if (isset($_POST["submit"])) { var_dump($_POST);
             $title = filter_input(INPUT_POST, "title", FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+            $text = filter_input(INPUT_POST, "text", FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+            $categoryId = filter_input(INPUT_POST, "category_id", FILTER_VALIDATE_INT);
+            $userId = filter_input(INPUT_POST, "user_id", FILTER_VALIDATE_INT);
+    
+            if ($title && $text && $categoryId && $userId) {
+                $topicManager->add([
+                    "title" => $title,
+                    "category_id" => $categoryId,
+                    "user_id" => $userId
+                ]);
+                $topicId = $topicManager->findOneByTitle($title)->getId();
+                $postManager->add([
+                    "text" => $text,
+                    "topic_id" => $topicId,
+                    "user_id" => $userId
+                ]);
+                $this->redirectTo("forum", "openTopicByID", $topicId);
+            }
         }
     }
+    
 }

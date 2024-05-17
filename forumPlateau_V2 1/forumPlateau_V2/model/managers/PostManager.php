@@ -25,5 +25,10 @@ public function __construct(){
             $this->className
         );
     }
+
+    public function addPost($data) {
+        $sql = "INSERT INTO post (text, topic_id) VALUES (:text, :topic_id)";
+        DAO::insert($sql, $data);
+    }
 }
 ?>

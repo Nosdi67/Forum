@@ -42,7 +42,13 @@ final class Post extends Entity {
      */ 
     public function getCreationDate()
     {
-        return $this->creationDate;
+        if ($this->creationDate instanceof \DateTime) {
+            return $this->creationDate->format('d/m/Y H:i:s');
+        }
+        // Si creationDate est une chaîne de caractères, la convertir
+        $date = new \DateTime($this->creationDate);
+        return $date->format('d/m/Y H:i:s');
+        
     }
 
     /**
@@ -52,8 +58,11 @@ final class Post extends Entity {
      */ 
     public function setCreationDate($creationDate)
     {
+        if (!$creationDate instanceof \DateTime) {
+            $creationDate = new \DateTime($creationDate);
+        }
         $this->creationDate = $creationDate;
-
+    
         return $this;
     }
 

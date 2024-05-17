@@ -28,6 +28,16 @@ class TopicManager extends Manager{
             $this->className
         );
     }
+    public function findOneByTitle($title) {
+        $sql = "SELECT *
+                FROM ".$this->tableName." t
+                WHERE t.title = :title";
+
+        return $this->getOneOrNullResult(
+            DAO::select($sql, ['title' => $title]),
+            $this->className
+        );
+    }
 
     public function addTopic($data) {
     
