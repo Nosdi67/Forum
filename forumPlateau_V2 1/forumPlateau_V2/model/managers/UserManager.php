@@ -21,4 +21,30 @@ class UserManager extends Manager{
         DAO::select($sql, ['id' => $id]),
         $this->className);
     }
+
+    public function addUser($data){
+        $sql="INSERT INTO ".$this->tableName." (nickName, email, mdp) VALUES (:nickName, :email, :mdp)";
+        DAO::insert($sql,$data);
+    }
+
+    public function findUserByNickName($nickName){
+        $sql = "SELECT *
+        FROM ".$this->tableName." WHERE nickName = :nickName";
+    
+
+        return $this->getOneOrNullResult(
+            DAO::select($sql, ['nickName' => $nickName]),
+            $this->className
+        );
+    }
+
+    public function findUserByEmail($email){
+        $sql = "SELECT *
+        FROM ".$this->tableName." WHERE email = :email";
+
+        return $this->getOneOrNullResult(
+            DAO::select($sql, ['email' => $email]),
+            $this->className
+        );
+    }
 }

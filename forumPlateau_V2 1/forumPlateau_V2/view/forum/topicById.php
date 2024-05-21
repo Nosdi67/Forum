@@ -3,20 +3,18 @@ $topic = $result["data"]["topic"];
 $category = $result["data"]["category"];
 $posts = $result["data"]["posts"];
 $users = $result["data"]["user"];
-$nomUser=$users->getNickName();
-$datePost=$topic->getCreationDate();
-
+$datePost = $topic->getCreationDate();
 ?>
 
 <h1><?php echo htmlspecialchars($topic->getTitle()); ?></h1>
-<p>Catégorie : <?php echo htmlspecialchars($category->getName()); ?></p>
+<p>Catégorie : <?php echo htmlspecialchars($topic->getCategory()->getName()); ?></p>
 
 <?php 
 if (empty($posts)) {
     echo "<p>Aucun message dans le topic</p>";
 } else {
     foreach ($posts as $post): ?>
-        <p><?php echo $post->getText()." envoyé par ". $nomUser." le ".$datePost; ?></p>
+        <p><?php echo $post->getText()." envoyé par ". $users->getNickName()." le ".$datePost; ?></p>
     <?php endforeach; 
 }
 ?>

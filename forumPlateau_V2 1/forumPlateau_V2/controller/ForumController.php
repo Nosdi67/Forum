@@ -41,7 +41,7 @@ class ForumController extends AbstractController implements ControllerInterface{
             "meta_description" => "Liste des topics par catégorie : ".$category,
             "data" => [
                 "category" => $category,
-                "topics" => $topics,
+                "topics" => $topics
                 
             ]
         ];
@@ -54,8 +54,8 @@ class ForumController extends AbstractController implements ControllerInterface{
         $userManager=new UserManager();
         $topic=$topicManager->findOneById($id);
         $posts=$postManager->findPostsByTopicId($id);
-        $category=$categoryManager->findOneById($id);
-        $users=$userManager->findOneById($id);
+        $category=$topic->getCategory();
+        $users=$topic->getUser();
         return [
             "view" => VIEW_DIR."forum/topicById.php",
             "meta_description" => "Détail d'un topic",
@@ -130,30 +130,46 @@ class ForumController extends AbstractController implements ControllerInterface{
         }
     }
 
-    public function addTopicAndFirstMessage() {
+    public function addTopicAndFirstMessage($id) {
         $topicManager = new TopicManager();
         $postManager = new PostManager();
-        if (isset($_POST["submit"])) { var_dump($_POST);
+        $categoryManager = new CategoryManager();
+        $userManager = new UserManager();
+        $user = $userManager->findOneById($id);
+        $category = $categoryManager->findOneById($id);
+    
+        if (isset($_POST["submit"])) {
             $title = filter_input(INPUT_POST, "title", FILTER_SANITIZE_FULL_SPECIAL_CHARS);
             $text = filter_input(INPUT_POST, "text", FILTER_SANITIZE_FULL_SPECIAL_CHARS);
             $categoryId = filter_input(INPUT_POST, "category_id", FILTER_VALIDATE_INT);
             $userId = filter_input(INPUT_POST, "user_id", FILTER_VALIDATE_INT);
-    
+            
             if ($title && $text && $categoryId && $userId) {
-                $topicManager->add([
+                // Ajouter le nouveau sujet et récupérer son identifiant
+                $topicId = $topicManager->add([
                     "title" => $title,
                     "category_id" => $categoryId,
                     "user_id" => $userId
                 ]);
-                $topicId = $topicManager->findOneByTitle($title)->getId();
-                $postManager->add([
-                    "text" => $text,
-                    "topic_id" => $topicId,
-                    "user_id" => $userId
-                ]);
-                $this->redirectTo("forum", "openTopicByID", $topicId);
+                
+                // Assurez-vous que l'ajout du sujet a réussi et que l'identifiant a été récupéré
+                if ($topicId) {
+                    // Ajouter le premier message associé à ce sujet
+                    $postManager->add([
+                        "text" => $text,
+                        "topic_id" => $topicId,
+                        "user_id" => $userId
+                    ]);
+                    
+                    // Rediriger vers le sujet nouvellement créé
+                    $this->redirectTo("forum", "openTopicByID", $topicId);
+                } else {
+                    // Gestion des erreurs si la création du sujet a échoué
+                    echo "Erreur lors de la création du sujet.";
+                }
             }
         }
     }
+    
     
 }
