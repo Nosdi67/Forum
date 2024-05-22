@@ -5,10 +5,11 @@ use App\Session;
 
 $session = new Session();
 
-echo "<span class='value_session'>" . $session->getFlash("message") . "</span>";
-
-
 ?>
+
+<div class='session_msg'><p><?php echo  $session->getFlash("message") ?></p></div>
+
+
 
 
 <h1>Inscrivez vous</h1>
