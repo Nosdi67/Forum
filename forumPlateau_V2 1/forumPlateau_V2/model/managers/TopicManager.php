@@ -44,4 +44,15 @@ class TopicManager extends Manager{
         $sql="INSERT INTO ".$this->tableName." (title, category_id) VALUES (:name,:category_id)";
         DAO::insert($sql,$data);
     }
+
+    public function findTopicsByUser($id) {
+        $sql = "SELECT *
+                FROM ".$this->tableName." t
+                WHERE t.user_id = :id";
+        
+    return $this->getMultipleResults(
+            DAO::select($sql, ['id' => $id]),
+            $this->className
+        );
+    }
 }

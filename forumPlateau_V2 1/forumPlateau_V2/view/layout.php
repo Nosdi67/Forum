@@ -21,10 +21,10 @@
                         <div id="nav-left">
                             <a href="/">Accueil</a>
                             <?php
-                            if(App\Session::isAdmin()){
-                                ?>
-                                <a href="index.php?ctrl=home&action=users">Voir la liste des gens</a>
-                            <?php } ?>
+                            // if(App\Session::isAdmin()){
+                            //     ?>
+                            //     <a href="index.php?ctrl=home&action=users">Voir la liste des gens</a>
+                            // <?php ?>
                         </div>
                         <div id="nav-right">
                         <?php
@@ -33,6 +33,8 @@
                                 ?>
                                 <a href="index.php?ctrl=security&action=profile"><span class="fas fa-user"></span>&nbsp;<?= App\Session::getUser()?></a>
                                 <a href="index.php?ctrl=security&action=logout">Déconnexion</a>
+                                <a href="index.php?ctrl=forum&action=index">Liste des catégories</a>
+                                <a href="index.php?ctrl=forum&action=toAddTopic">Ajouter un Topic</a>
                                 <?php
                             }
                             else{

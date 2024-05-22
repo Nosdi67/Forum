@@ -3,6 +3,7 @@ namespace Model\Managers;
 
 use App\Manager;
 use App\DAO;
+use App\Session;
 
 class UserManager extends Manager{
 
@@ -43,8 +44,25 @@ class UserManager extends Manager{
         FROM ".$this->tableName." WHERE email = :email";
 
         return $this->getOneOrNullResult(
-            DAO::select($sql, ['email' => $email]),
+            DAO::select($sql, ['email' => $email], false),
             $this->className
         );
     }
+
+    public function updateUserNickName(){
+        $sql = "UPDATE ".$this->tableName." SET nickName = :nickName WHERE id_user = :id";
+        DAO::update($sql, ['nickName' => $_POST["nickName"],'id' => Session::getUser()->getId()]);
+    }
+
+    public function updateUserEmail(){
+        $sql = "UPDATE ".$this->tableName." SET email = :email WHERE id_user = :id";
+        DAO::update($sql, ['email' => $_POST["email"],'id' => Session::getUser()->getId()]);
+    }
+
+    public function updateUserMdp(){
+        $sql = "UPDATE ".$this->tableName." SET mdp = :mdp WHERE id_user = :id";
+        DAO::update($sql, ['mdp' => $_POST["mdp"],'id' => Session::getUser()->getId()]);
+    }
+
+   
 }

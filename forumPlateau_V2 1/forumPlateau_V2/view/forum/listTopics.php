@@ -5,6 +5,8 @@
 
 <h1>Liste des topics</h1>
 
+<h2><?= $category->getName() ?></h2>
+
 <?php
 if($topics==null){
     echo "<p>Pas de Topic dans cette categorie</p>".

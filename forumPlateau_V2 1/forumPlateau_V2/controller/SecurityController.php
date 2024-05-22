@@ -5,6 +5,7 @@ namespace Controller;
 use App\AbstractController;
 use App\Session;
 use Model\Managers\UserManager;
+use Model\Managers\TopicManager;
 
 class SecurityController extends AbstractController {
     // Méthodes liées à l'authentification : register, login et logout
@@ -70,9 +71,92 @@ class SecurityController extends AbstractController {
 
     public function login() {
         
+        return[
+            "view" => VIEW_DIR. "security/login.php",
+            "meta_description" => "Login Form"
+        ];
     }
 
-    public function logout() {
-        
-    }
-}
+    public function loginUser(){
+        if(isset($_POST["submit"])){
+            $userManager = new UserManager();
+            $email = filter_input(INPUT_POST, "email", FILTER_VALIDATE_EMAIL);
+            $mdp = filter_input(INPUT_POST, "mdp", FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+            
+            if($email && $mdp){
+                $user=$userManager->findUserByEmail($email);
+                // var_dump($user);die;
+                if($user){
+                  $hash=$user->getMdp();
+                    if(password_verify($mdp, $hash)){
+                        Session::addFlash("message", "Vous êtes bien connecté!");
+                        Session::setUser($user);
+                        $this->redirectTo("forum", "backHomePage");
+                    }else{
+                        Session::addFlash("message", "Mot de passe incorrect");
+                        $this->redirectTo("security", "login");
+                    }
+                
+                }else{
+                    Session::addFlash("message", "Email incorrect");
+                    $this->redirectTo("security", "login");
+                    }
+                }
+            }
+        }
+        public static function logout(){
+            Session::destroy();
+            Session::addFlash("success", "Vous êtes déconnecté");
+            return [
+                "view" => VIEW_DIR. "home.php",
+                "meta_description" => "Login Form"
+            ];
+        }
+
+        public static function profile(){
+            $topicManager = new TopicManager();
+            $topics=$topicManager->findTopicsByUser(Session::getUser()->getid());
+            return [
+                "view" => VIEW_DIR. "security/profil.php",
+                "meta_description" => "Login Form",
+                "data"=>[
+                    "user"=>Session::getUser(),
+                    "topics"=>$topics
+                ]
+            ];
+        }
+
+        public function editProfile(){
+            if(isset($_POST["submit"])){
+                
+                $user = Session::getUser()->getid();
+                $userManager = new UserManager();
+                $nickName=filter_input(INPUT_POST, "nickName", FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+                $email=filter_input(INPUT_POST, "email", FILTER_VALIDATE_EMAIL);
+                $mdp=filter_input(INPUT_POST, "mdp", FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+                
+
+                if($nickName){
+                    var_dump($user,$nickName);
+                    $userManager->updateUserNickName([
+                        "nickName" => $nickName,
+                        "id" => $user]);
+
+                        Session::addFlash("message", "Votre nom d'utilisateur a bien été modifié");
+                    }elseif($email){
+                        $userManager->updateUserEmail([
+                            "email" => $email,
+                            "id" => $user]);
+                        
+                            Session::addFlash("message", "Votre email a bien été modifié");
+                    }elseif($mdp){
+                        $userManager->updateUserMdp([
+                            "mdp" => $mdp,
+                            "id" => $user]);
+
+                            Session::addFlash("message", "Votre mot de passe a bien été modifié");
+                    }
+                    $this->redirectTo("security", "profile");
+                }
+            }
+        }

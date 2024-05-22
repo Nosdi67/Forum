@@ -9,6 +9,7 @@ final class Post extends Entity {
     private $id;
     private $text;
     private $creationDate;
+    private $user;
    
 
   public function __construct($data){
@@ -82,6 +83,26 @@ final class Post extends Entity {
     public function setId($id)
     {
         $this->id = $id;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of user
+     */ 
+    public function getUser()
+    {
+        return $this->user;
+    }
+
+    /**
+     * Set the value of user
+     *
+     * @return  self
+     */ 
+    public function setUser($user)
+    {
+        $this->user = $user;
 
         return $this;
     }

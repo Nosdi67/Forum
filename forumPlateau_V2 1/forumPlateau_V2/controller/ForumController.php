@@ -50,21 +50,17 @@ class ForumController extends AbstractController implements ControllerInterface{
     public function openTopicByID($id) {
         $topicManager=new TopicManager();
         $postManager=new PostManager();
-        $categoryManager=new CategoryManager();
-        $userManager=new UserManager();
         $topic=$topicManager->findOneById($id);
         $posts=$postManager->findPostsByTopicId($id);
         $category=$topic->getCategory();
-        $users=$topic->getUser();
+       
         return [
             "view" => VIEW_DIR."forum/topicById.php",
             "meta_description" => "Détail d'un topic",
             "data" => [
                 "topic" => $topic,
                 "category" => $category,
-                "title" => $topic,
                 "posts" => $posts,
-                "user" => $users
             ]
         ];
     }
@@ -113,8 +109,9 @@ class ForumController extends AbstractController implements ControllerInterface{
         $postManager = new PostManager();
         $topicManager = new TopicManager();
         $userManager = new UserManager();
-        $topicId= $topicManager->findOneById($id);
-        // $userId= $userManager->findOneById(1)->getId();
+        $userId=Session::getUser()->getId();
+
+        // var_dump($userId);die;
 
         if(isset($_POST["submit"])){
             $text = filter_input(INPUT_POST, "text", FILTER_SANITIZE_FULL_SPECIAL_CHARS);
@@ -123,7 +120,7 @@ class ForumController extends AbstractController implements ControllerInterface{
                 $postManager->add([
                     "text" => $text,
                     "topic_id" => $id,
-                    "user_id" => 1
+                    "user_id" => $userId
                 ]);
                 $this->redirectTo("forum", "openTopicByID", $id);
             }
@@ -170,6 +167,57 @@ class ForumController extends AbstractController implements ControllerInterface{
             }
         }
     }
-    
-    
-}
+
+    public function toAddTopic(){
+        $categoryManager = new CategoryManager();
+        
+        return[
+            "view" => VIEW_DIR."forum/addTopic.php",
+            "meta_description" => "Ajouter un topic",
+            "data"=>[
+                "categories" => $categoryManager->findAll()
+            ]
+            
+        ];
+    }
+
+    public function addTopicAndPostByUser() {
+
+
+        $topicManager = new TopicManager();
+        $postManager = new PostManager();
+        $categoryManager = new CategoryManager();
+        $userManager = new UserManager();
+        $userId = Session::getUser()->getId();
+        $user = $userManager->findOneById($userId)->getId();
+        
+       
+        if (isset($_POST["submit"])) 
+            $title = filter_input(INPUT_POST, "title", FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+            $text = filter_input(INPUT_POST, "text", FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+            $categoryId = filter_input(INPUT_POST, "category_id", FILTER_VALIDATE_INT);
+            $userId = filter_input(INPUT_POST, "user_id", FILTER_VALIDATE_INT);
+            var_dump($title, $text, $categoryId, $userId);
+            if ($title && $text && $categoryId && $user) {
+                // Ajouter le nouveau sujet et récupérer son identifiant
+                $topicId = $topicManager->add([
+                    "title" => $title,
+                    "category_id" => $categoryId,
+                    "user_id" => $user
+                ]);
+                if ($topicId) {
+                    // Ajouter le premier message associé à ce sujet
+                    $postManager->add([
+                        "text" => $text,
+                        "topic_id" => $topicId,
+                        "user_id" => $user
+                    ]);
+                    // Rediriger vers le sujet nouvellement créé
+                    $this->redirectTo("forum", "openTopicByID", $topicId);
+                }else {
+                    // Gestion des erreurs si la création du sujet a échoué
+                    echo "Erreur lors de la création du sujet.";
+                }
+            }
+        }
+    }

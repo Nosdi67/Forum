@@ -11,6 +11,9 @@ final class User extends Entity{
 
     private $id;
     private $nickName;
+    private $email;
+    private $mdp;
+    private $creationDate;
 
     public function __construct($data){         
         $this->hydrate($data);        
@@ -53,5 +56,71 @@ final class User extends Entity{
 
     public function __toString() {
         return $this->nickName;
+    }
+
+    /**
+     * Get the value of mdp
+     */ 
+    public function getMdp()
+    {
+        return $this->mdp;
+    }
+
+    /**
+     * Set the value of mdp
+     *
+     * @return  self
+     */ 
+    public function setMdp($mdp)
+    {
+        $this->mdp = $mdp;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of email
+     */ 
+    public function getEmail()
+    {
+        return $this->email;
+    }
+
+    /**
+     * Set the value of email
+     *
+     * @return  self
+     */ 
+    public function setEmail($email)
+    {
+        $this->email = $email;
+
+        return $this;
+    }
+
+    public function getCreationDate()
+    {
+        if ($this->creationDate instanceof \DateTime) {
+            return $this->creationDate->format('d/m/Y H:i:s');
+        }
+        // Si creationDate est une chaîne de caractères, la convertir
+        $date = new \DateTime($this->creationDate);
+        return $date->format('d/m/Y H:i:s');
+        
+    }
+
+    /**
+     * Set the value of creationDate
+     *
+     * @return  self
+     */ 
+    public function setCreationDate($creationDate)
+    {
+        if (!$creationDate instanceof \DateTime) {
+            $creationDate = new \DateTime($creationDate);
+        }
+        $this->creationDate = $creationDate;
+    
+        return $this;
     }
 }

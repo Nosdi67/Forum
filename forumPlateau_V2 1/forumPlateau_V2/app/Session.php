@@ -1,6 +1,8 @@
 <?php
 namespace App;
 
+use App\AbstractController;
+
 class Session{
 
     private static $categories = ['error', 'success'];
@@ -24,6 +26,10 @@ class Session{
         else $msg = "";
         
         return $msg;
+    }
+
+    public static function destroy(){
+        unset($_SESSION); 
     }
 
     /**
