@@ -54,6 +54,7 @@ abstract class DAO{
         try{
             $stmt = self::$bdd->prepare($sql);
             
+            // var_dump($sql);die;
             //on renvoie l'état du statement après exécution (true ou false)
             return $stmt->execute($params);
             

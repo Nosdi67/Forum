@@ -81,7 +81,42 @@ class ForumController extends AbstractController implements ControllerInterface{
         }
         
     }
-    
+    public function lockTopic($id){
+    if(isset($_POST["submit"])){
+        $verouillage=filter_input(INPUT_POST, "verrouillage", FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        $user=Session::getUser();
+        $topicManager = new TopicManager();
+
+
+        var_dump("ok");die;
+        
+        if($user->getId()==$topicManager->findTopicsByUser($id)){
+            if($verouillage=="1"){
+                // var_dump("ok");die;
+                $topicManager->updateTopicStatus([
+                    "id" => $id,
+                    "statut" => 1
+                ]);
+                $this->redirectTo("forum", "openTopicById", $id);
+            
+                }elseif($verouillage=="0"){
+                $topicManager->updateTopicStatus([
+                    "id" => $id,
+                    "statut" => 0
+                ]);
+                $this->redirectTo("forum", "openTopicById", $id);
+                }else{
+                    Session::addFlash("message","Vous ne pouvez pas verouiller un topic sans être connecté");
+                    $this->redirectTo("forum", "openTopicById", $id);
+                }
+            }
+            else{
+                Session::addFlash("message","Vous ne pouvez pas verouiller un topic sans être connecté");
+                $this->redirectTo("forum", "openTopicById", $id);
+            }
+        }
+    }
+
     
     public function backHomePage(){
         

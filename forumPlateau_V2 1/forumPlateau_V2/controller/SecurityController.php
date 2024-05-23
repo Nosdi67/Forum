@@ -177,7 +177,6 @@ class SecurityController extends AbstractController {
                         $userManager->updateUserMdp([
                             "mdp" => $hashedPassword,
                             "id" => $user]);
-                            var_dump($user,$hashedPassword);die;
                             Session::addFlash("message", "Votre mot de passe a bien été modifié");
                     }elseif($image){
                         $extension = pathinfo($image, PATHINFO_EXTENSION);

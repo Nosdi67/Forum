@@ -14,7 +14,7 @@ final class Topic extends Entity{
     private $user;
     private $category;
     private $creationDate;
-    private $verouiller;
+    private $statut;
 
     public function __construct($data){         
         $this->hydrate($data);        
@@ -121,31 +121,17 @@ final class Topic extends Entity{
     
         return $this;
     }
+    public function getStatut(){
+        return $this->statut;
+    }
+    public function setStatut($statut){
+        $this->statut = $statut;
+        return $this;
+    }
     
 
     public function __toString(){
         return $this->title;
     }
 
-
-
-    /**
-     * Get the value of verouiller
-     */ 
-    public function getVerouiller()
-    {
-        return $this->verouiller;
-    }
-
-    /**
-     * Set the value of verouiller
-     *
-     * @return  self
-     */ 
-    public function setVerouiller($verouiller)
-    {
-        $this->verouiller = $verouiller;
-
-        return $this;
-    }
 }

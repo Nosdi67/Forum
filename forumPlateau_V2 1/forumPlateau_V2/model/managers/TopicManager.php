@@ -45,6 +45,21 @@ class TopicManager extends Manager{
         DAO::insert($sql,$data);
     }
 
+    public function updateTopicStatus($data) {
+        $sql="UPDATE ". $this->tableName." SET statut = :statut WHERE id_topic = :id";
+        DAO::update($sql,['statut'=>$data["statut"],'id'=>$data["id"]]);
+    }
+    public function findTopicByUser($id) {
+        $sql = "SELECT *
+                FROM ".$this->tableName." t
+                WHERE t.user_id = :id";
+
+    return $this->getOneOrNullResult(
+            DAO::select($sql, ['id' => $id]),
+            $this->className
+        );
+    }
+
     public function findTopicsByUser($id) {
         $sql = "SELECT *
                 FROM ".$this->tableName." t
