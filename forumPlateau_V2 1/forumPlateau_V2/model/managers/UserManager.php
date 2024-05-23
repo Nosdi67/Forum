@@ -38,6 +38,15 @@ class UserManager extends Manager{
             $this->className
         );
     }
+    public function findImageByUserId($id){
+        $sql = "SELECT image
+        FROM ".$this->tableName." WHERE id_user = :id";
+
+        return $this->getOneOrNullResult(
+            DAO::select($sql, ['id' => $id]),
+            $this->className
+        );
+    }
 
     public function findUserByEmail($email){
         $sql = "SELECT *
@@ -59,9 +68,14 @@ class UserManager extends Manager{
         DAO::update($sql, ['email' => $_POST["email"],'id' => Session::getUser()->getId()]);
     }
 
-    public function updateUserMdp(){
+    public function updateUserMdp($data){
         $sql = "UPDATE ".$this->tableName." SET mdp = :mdp WHERE id_user = :id";
-        DAO::update($sql, ['mdp' => $_POST["mdp"],'id' => Session::getUser()->getId()]);
+        DAO::update($sql, ['mdp' => $data["mdp"],'id' => Session::getUser()->getId()]);
+    }
+
+    public function updateUserImage($data){
+        $sql = "UPDATE ".$this->tableName." SET image = :image WHERE id_user = :id";
+        DAO::update($sql, ['image' => $data["image"],'id' => Session::getUser()->getId()]);
     }
 
    

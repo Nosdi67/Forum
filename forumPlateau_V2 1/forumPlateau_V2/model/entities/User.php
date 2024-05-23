@@ -14,6 +14,7 @@ final class User extends Entity{
     private $email;
     private $mdp;
     private $creationDate;
+    private $image;
 
     public function __construct($data){         
         $this->hydrate($data);        
@@ -121,6 +122,26 @@ final class User extends Entity{
         }
         $this->creationDate = $creationDate;
     
+        return $this;
+    }
+
+    /**
+     * Get the value of image
+     */ 
+    public function getImage()
+    {
+        return $this->image;
+    }
+
+    /**
+     * Set the value of image
+     *
+     * @return  self
+     */ 
+    public function setImage($image)
+    {
+        $this->image = $image;
+
         return $this;
     }
 }

@@ -4,6 +4,7 @@ namespace Controller;
 use App\Session;
 use App\AbstractController;
 use App\ControllerInterface;
+use Model\Entities\Category;
 use Model\Managers\CategoryManager;
 use Model\Managers\TopicManager;
 use Model\Managers\PostManager;
@@ -27,44 +28,60 @@ class ForumController extends AbstractController implements ControllerInterface{
             ]
         ];
     }
+    public function error(){
+        return[
+            "view"=>VIEW_DIR."forum/errorPage.php",
+            "meta_description"=>"Page introuvable"
+        ];
+    }
 
     public function listTopicsByCategory($id) {
 
         $topicManager = new TopicManager();
         $categoryManager = new CategoryManager();
         $category = $categoryManager->findOneById($id);
-        $topics = $topicManager->findTopicsByCategory($id);
-        
 
-        return [
-            "view" => VIEW_DIR."forum/listTopics.php",
-            "meta_description" => "Liste des topics par catégorie : ".$category,
-            "data" => [
-                "category" => $category,
-                "topics" => $topics
-                
-            ]
-        ];
+        if($category) {
+            $topics = $topicManager->findTopicsByCategory($id);
+            
+            return [
+                "view" => VIEW_DIR."forum/listTopics.php",
+                "meta_description" => "Liste des topics par catégorie : ".$category,
+                "data" => [
+                    "category" => $category,
+                    "topics" => $topics
+                    
+                ]
+            ];
+
+        } else {
+            $this->redirectTo("forum", "error");
+        }
     }
 
     public function openTopicByID($id) {
         $topicManager=new TopicManager();
         $postManager=new PostManager();
         $topic=$topicManager->findOneById($id);
-        $posts=$postManager->findPostsByTopicId($id);
-        $category=$topic->getCategory();
-       
-        return [
-            "view" => VIEW_DIR."forum/topicById.php",
-            "meta_description" => "Détail d'un topic",
-            "data" => [
-                "topic" => $topic,
-                "category" => $category,
-                "posts" => $posts,
-            ]
-        ];
+        
+        if($topic){
+            $posts=$postManager->findPostsByTopicId($id);
+            $category=$topic->getCategory();
+            return [
+                "view" => VIEW_DIR."forum/topicById.php",
+                "meta_description" => "Détail d'un topic",
+                "data" => [
+                    "topic" => $topic,
+                    "category" => $category,
+                    "posts" => $posts
+                ]
+            ];
+        }else{
+            $this->redirectTo("forum", "error");
+        }
+        
     }
-
+    
     
     public function backHomePage(){
         

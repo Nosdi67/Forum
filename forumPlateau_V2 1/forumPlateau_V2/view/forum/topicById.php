@@ -4,7 +4,8 @@ $category = $result["data"]["category"];
 $posts = $result["data"]["posts"];
 ?>
 
-<h1><?php echo htmlspecialchars($topic->getTitle()); ?></h1>
+<h1><?php echo htmlspecialchars($topic->getTitle());?></h1>
+<a href=""><?= $topic->getVerouiller(); ?></a>
 <p>Catégorie : <?php echo htmlspecialchars($topic->getCategory()->getName()); ?></p>
 
 <?php 

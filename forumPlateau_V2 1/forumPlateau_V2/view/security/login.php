@@ -12,10 +12,10 @@ $session=new Session();
 <form action="index.php?ctrl=security&action=loginUser" method="POST">
 
     <label for="email">Email</label>
-    <input type="email" id="email" name="email" value="testlemail@gmail.com" placeholder="Email">
+    <input type="email" id="email" name="email" value="mail@test.com" placeholder="Email">
 
     <label for="mdp">Mot de passe</label>
-    <input type="password" id="mdp" name="mdp" value="NickName2&">
+    <input type="password" id="mdp" name="mdp" value="Testmdp22&">
 
     <button type="submit" name="submit">Se connecter</button>
 </form>

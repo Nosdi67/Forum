@@ -26,13 +26,23 @@ class SecurityController extends AbstractController {
             $mdp1 = filter_input(INPUT_POST, "mdp", FILTER_SANITIZE_FULL_SPECIAL_CHARS);
             $mdp2 = filter_input(INPUT_POST, "mdpdVerif", FILTER_SANITIZE_FULL_SPECIAL_CHARS);
             $email = filter_input(INPUT_POST, "email", FILTER_VALIDATE_EMAIL);
-
-            // Vérification du NickName
-            $regexUser = preg_match('/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).+$/', $nickName);
-
-            if (!$regexUser) {
-                Session::addFlash("message", "Le NickName n'est pas correct. Assurez-vous qu'il contient au moins une majuscule, une minuscule et un chiffre.");
-                $this->redirectTo("security", "register");
+            $image=$_FILES['image']['name'];
+            $fileTmp=$_FILES['image']['tmp_name'];
+            $uploadeDirection = "public/images/photoDeProfil";
+            
+            
+            $defaultImage='public/defaultPics/images.png';
+            
+            if ($image){
+                $extension = pathinfo($image, PATHINFO_EXTENSION);
+                $newName = uniqid().".".$extension;
+                $uploadFile = $uploadeDirection."/".$newName;
+                $finalPath = $uploadeDirection.$newName;
+                move_uploaded_file($fileTmp, $uploadFile);
+            }elseif(empty($image)){
+                $finalPath=$defaultImage;
+            }else{
+                $finalPath=$defaultImage;
             }
 
             // Vérification de l'unicité du NickName et de l'email
@@ -62,10 +72,12 @@ class SecurityController extends AbstractController {
             $userManager->add([
                 "nickName" => $nickName,
                 "mdp" => $hashedPassword,
-                "email" => $email
+                "email" => $email,
+                "image" => $finalPath
             ]);
             Session::addFlash("message", "Vous êtes bien inscrit!");
-            $this->redirectTo("security", "register");
+            Session::setUser($userManager->findUserByEmail($email));
+            $this->redirectTo("security", "profile");
         }
     }
 
@@ -82,6 +94,7 @@ class SecurityController extends AbstractController {
             $userManager = new UserManager();
             $email = filter_input(INPUT_POST, "email", FILTER_VALIDATE_EMAIL);
             $mdp = filter_input(INPUT_POST, "mdp", FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+            
             
             if($email && $mdp){
                 $user=$userManager->findUserByEmail($email);
@@ -134,6 +147,12 @@ class SecurityController extends AbstractController {
                 $nickName=filter_input(INPUT_POST, "nickName", FILTER_SANITIZE_FULL_SPECIAL_CHARS);
                 $email=filter_input(INPUT_POST, "email", FILTER_VALIDATE_EMAIL);
                 $mdp=filter_input(INPUT_POST, "mdp", FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+                $mdp2=filter_input(INPUT_POST, "mdp2", FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+                $image=$_FILES["image"]["name"];
+                $regexMdp = preg_match('/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/', $mdp);
+                $uploadeDirection = "public/images/photoDeProfil/";
+                $fileTmp = $_FILES["image"]["tmp_name"];
+
                 
 
                 if($nickName){
@@ -149,14 +168,35 @@ class SecurityController extends AbstractController {
                             "id" => $user]);
                         
                             Session::addFlash("message", "Votre email a bien été modifié");
-                    }elseif($mdp){
+                    }elseif($mdp && $mdp2){
+                        if ($mdp !== $mdp2 || !$regexMdp) {
+                            Session::addFlash("message", "Les mots de passe sont pas identiques, ou les critres d mot de passe ne sont pas respectés.. Assurez-vous qu'il contient au moins une majuscule, une minuscule, un chiffre et un caractère spécial.");
+                            $this->redirectTo("security", "profile");
+                        }
+                        $hashedPassword = password_hash($mdp, PASSWORD_DEFAULT);
                         $userManager->updateUserMdp([
-                            "mdp" => $mdp,
+                            "mdp" => $hashedPassword,
                             "id" => $user]);
-
+                            var_dump($user,$hashedPassword);die;
                             Session::addFlash("message", "Votre mot de passe a bien été modifié");
-                    }
+                    }elseif($image){
+                        $extension = pathinfo($image, PATHINFO_EXTENSION);
+                        $newName = uniqid().".".$extension;
+                        $uploadFile = $uploadeDirection."/".$newName;
+                        $finalPath = $uploadeDirection.$newName;
+                        move_uploaded_file($fileTmp, $uploadFile);
+
+                        $data=[
+                            "image" => $finalPath,
+                            "id" => $user
+                        ];
+                        $userManager->updateUserImage([
+                            "image" =>$data["image"],
+                            "id" => $data["id"]]);
+                            Session::addFlash("message", "Votre photo de profil a bien été modifié");
+
                     $this->redirectTo("security", "profile");
                 }
             }
         }
+    }
