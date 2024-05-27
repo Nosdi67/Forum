@@ -86,13 +86,11 @@ class ForumController extends AbstractController implements ControllerInterface{
         $verouillage=filter_input(INPUT_POST, "verrouillage", FILTER_SANITIZE_FULL_SPECIAL_CHARS);
         $user=Session::getUser();
         $topicManager = new TopicManager();
-
-
-        var_dump("ok");die;
+        $topic = $topicManager->findOneById($id);
         
-        if($user->getId()==$topicManager->findTopicsByUser($id)){
+        
+        if($user->getId()== $topic->getUser()->getId()){
             if($verouillage=="1"){
-                // var_dump("ok");die;
                 $topicManager->updateTopicStatus([
                     "id" => $id,
                     "statut" => 1
@@ -106,13 +104,13 @@ class ForumController extends AbstractController implements ControllerInterface{
                 ]);
                 $this->redirectTo("forum", "openTopicById", $id);
                 }else{
-                    Session::addFlash("message","Vous ne pouvez pas verouiller un topic sans être connecté");
+                    Session::addFlash("message","erreur");;
                     $this->redirectTo("forum", "openTopicById", $id);
                 }
             }
             else{
-                Session::addFlash("message","Vous ne pouvez pas verouiller un topic sans être connecté");
-                $this->redirectTo("forum", "openTopicById", $id);
+                Session::addFlash("message","Vous pouvez pas verouiller/deverouiller ce topic car vous n'êtes pas l'auteur");
+                $this->redirectTo("forum", "error", $id);
             }
         }
     }
@@ -175,6 +173,36 @@ class ForumController extends AbstractController implements ControllerInterface{
                     "user_id" => $userId
                 ]);
                 $this->redirectTo("forum", "openTopicByID", $id);
+            }
+        }
+    }
+
+    public function deletePost($id){
+        $user=Session::getUser()->getId();
+        $postManager = new PostManager();
+        $post = $postManager->findOneById($id);
+        
+        if($post && $post->getUser()->getId()==$user){
+            $postManager->delete($id);
+            $this->redirectTo("forum", "openTopicByID", $post->getTopic()->getId());         
+        
+        }else{
+            Session::addFlash("message","Vous n'êtes pas l'auteur de ce message");
+        }
+        $this->redirectTo("forum","openTopicByID",$post->getTopic()->getId());
+    }
+
+    public function modifyPost($id){
+        $text = filter_input(INPUT_POST, "text", FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        if(isset($_POST["submit"])){
+            $postManager = new PostManager();
+            $post = $postManager->findOneById($id);
+            if($post){
+                $postManager->updatePost([
+                    "id" => $id,
+                    "text" => $text
+                ]);
+                $this->redirectTo("forum", "openTopicByID", $post->getTopic()->getId());
             }
         }
     }

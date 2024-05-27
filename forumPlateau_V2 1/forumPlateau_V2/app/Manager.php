@@ -37,7 +37,7 @@ abstract class Manager{
                 ";
 
         return $this->getOneOrNullResult(
-            DAO::select($sql, ['id' => $id], false), 
+            DAO::select($sql, ['id' => $id],false), 
             $this->className
         );
     }

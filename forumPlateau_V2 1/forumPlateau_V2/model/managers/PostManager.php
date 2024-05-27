@@ -30,5 +30,10 @@ public function __construct(){
         $sql = "INSERT INTO post (text, topic_id) VALUES (:text, :topic_id)";
         DAO::insert($sql, $data);
     }
+
+    public function updatePost($data){
+        $sql="UPDATE ". $this->tableName." SET text = :text WHERE id_post = :id";
+        DAO::insert($sql, ['text'=>$data["text"],'id'=>$data["id"]]);
+    }
 }
 ?>
