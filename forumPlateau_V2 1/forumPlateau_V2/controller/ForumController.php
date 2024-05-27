@@ -117,10 +117,14 @@ class ForumController extends AbstractController implements ControllerInterface{
 
     
     public function backHomePage(){
-        
+        $topicManager = new TopicManager();
+        $topics = $topicManager->findFeaturedTopics();
         return [
             "view" => VIEW_DIR."home.php",
-            "meta_description" => "Page d'accueil du forum"
+            "meta_description" => "Page d'accueil du forum",
+            "data"=>[
+                "topic" => $topics
+            ]
         ];
     }
 
@@ -194,6 +198,7 @@ class ForumController extends AbstractController implements ControllerInterface{
 
     public function modifyPost($id){
         $text = filter_input(INPUT_POST, "text", FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        
         if(isset($_POST["submit"])){
             $postManager = new PostManager();
             $post = $postManager->findOneById($id);

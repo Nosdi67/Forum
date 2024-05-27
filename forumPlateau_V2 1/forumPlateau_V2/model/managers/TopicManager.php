@@ -71,4 +71,17 @@ class TopicManager extends Manager{
         );
         
     }
+
+    public function findFeaturedTopics(){
+        $sql = "SELECT t.id_topic, t.title, t.creationDate, COUNT(p.id_post) AS post_count
+                FROM ".$this->tableName." t
+                LEFT JOIN post p ON p.topic_id = t.id_topic
+                GROUP BY t.id_topic
+                ORDER BY post_count DESC
+                LIMIT 6";
+        return  $this->getMultipleResults(
+        DAO::select($sql, null,true),
+        $this->className
+        );
+    }
 }
