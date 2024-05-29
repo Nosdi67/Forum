@@ -223,3 +223,12 @@ p[id^="post-"] {
     padding: 10px;
     font-size: small;
 }
+form textarea{
+    width: 97%;
+    height: 100px;
+    padding: 10px;
+    margin: 10px;
+    border-radius: 10px;
+    border: black solid;
+    resize: none;
+}

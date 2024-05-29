@@ -39,22 +39,29 @@ $user=Session::getUser();
 <div id="postSection">
 <?php if (empty($posts)) {
     echo "<p>Aucun message dans le topic</p>";
-} else {?>
+} else { ?>
         <?php foreach ($posts as $post): ?>
-            <div class="post-wrapper">
-                <p id="post-<?php echo $post->getId() ?>">
-                    <span class="text"><?php echo $post->getText() ?></span>
-                </p>
-                <p id="postDetails"> envoyé par <?php echo $post->getUser()->getNickName() ?>
-                    le <?php echo $post->getCreationDate(); ?>
-                </p>
-                <?php if (isset($_SESSION["user"]) && $user->getId() == $post->getUser()->getId()): ?>
-                    <p><a href="index.php?ctrl=forum&action=deletePost&id=<?php echo $post->getId() ?>">Supprimer le message</a></p>
-                    <a href="#" class="edit-post" data-post-id="<?php echo $post->getId() ?>">Modifier le Message</a>
-                <?php endif; ?>
-            </div>
-        <?php endforeach;?>
-    <?php }?>
+    <div class="post-wrapper" id="post-wrapper-<?php echo $post->getId() ?>">
+        <p id="post-<?php echo $post->getId() ?>">
+            <span class="text"><?php echo $post->getText() ?></span>
+        </p>
+        <p id="postDetails"> envoyé par <?php echo $post->getUser()->getNickName() ?>
+            le <?php echo $post->getCreationDate(); ?>
+        </p>
+        <?php if (isset($_SESSION["user"]) && $user->getId() == $post->getUser()->getId()): ?>
+            <p>
+                <a href="index.php?ctrl=forum&action=deletePost&id=<?php echo $post->getId() ?>">Supprimer le message</a>
+            </p>
+            <a href="#" class="edit-post" data-post-id="<?php echo $post->getId() ?>">Modifier le Message</a>
+            <form action="index.php?ctrl=forum&action=modifyPost&id=<?php echo $post->getId() ?>" method="post" class="edit-form" style="display: none;">
+                <textarea name="text"><?php echo $post->getText() ?></textarea>
+                <button type="submit" name="submit">Sauvegarder</button>
+            </form>
+        <?php endif; ?>
+    </div>
+<?php endforeach; ?>
+<?php } ?>
+
 
 
 
@@ -74,94 +81,28 @@ $user=Session::getUser();
 <a href="index.php?ctrl=forum&action=listTopicsByCategory&id=<?= htmlspecialchars($category->getId()) ?>">Revenir en arrière</a>
 
 
-<script>
- document.addEventListener("DOMContentLoaded", function() {
-    const editPostButtons = document.querySelectorAll('.edit-post');
+ <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll(".edit-post").forEach(function(button) {
+            button.addEventListener("click", function(event) {
+                event.preventDefault();
+                
+                // Trouver les éléments concernés
+                var postId = this.getAttribute("data-post-id");
+                var postWrapper = document.getElementById("post-wrapper-" + postId);
+                var textElement = postWrapper.querySelector("p .text");
+                var editForm = postWrapper.querySelector(".edit-form");
+                var textarea = editForm.querySelector("textarea");
 
-    editPostButtons.forEach(function(link) {
-        link.addEventListener('click', function(event) {
-            event.preventDefault();
-            const postId = link.dataset.postId;
-            const postContentElement = document.getElementById(`post-${postId}`);
-            
-            if (postContentElement) {
-                const postTextElement = postContentElement.querySelector('.text');
+                // Pré-remplir le textarea avec le texte actuel du message
+                textarea.value = textElement.innerText;
 
-                if (postTextElement) {
-                    const postContent = postTextElement.textContent;
-
-                    // Créer les éléments de formulaire
-                    const postForm = document.createElement('form');
-                    const postInput = document.createElement('input');
-                    const postSubmit = document.createElement('button');
-                    const postHiddenSubmit = document.createElement('input');
-
-                    // Configurer les éléments
-                    postInput.type = 'text';
-                    postInput.name = 'text';
-                    postInput.value = postContent;
-                    postSubmit.type = 'submit';
-                    postSubmit.textContent = 'Enregistrer';
-                    postHiddenSubmit.type = 'hidden';
-                    postHiddenSubmit.name = 'submit';
-                    postHiddenSubmit.value = '1';
-
-                    // Ajouter les éléments au formulaire
-                    postForm.appendChild(postInput);
-                    postForm.appendChild(postHiddenSubmit);
-                    postForm.appendChild(postSubmit);
-                    postContentElement.parentNode.insertBefore(postForm, postContentElement.nextSibling);
-
-                    // Cacher le contenu original temporairement
-                    postContentElement.style.display = 'none';
-
-                    // Focus sur le champ de saisie
-                    postInput.focus();
-
-                    // Gestion de la soumission du formulaire
-                    postForm.addEventListener('submit', function(e) {
-                        e.preventDefault();
-                        const updatedContent = postInput.value;
-
-                        // Envoie des données via POST
-                        fetch(`index.php?ctrl=forum&action=modifyPost&id=${postId}`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/x-www-form-urlencoded',
-                            },
-                            body: `text=${encodeURIComponent(updatedContent)}&submit=1`
-                        }).then(response => response.text()).then(data => {
-                            console.log(`Response: ${data}`); // Debug: Log la réponse du serveur
-                            if (data.trim() === 'success') {
-                                // Mise à jour du contenu sur succès
-                                postTextElement.textContent = updatedContent;
-                                postContentElement.style.display = 'inline';
-                                postForm.remove();
-                            } else {
-                                console.error('Erreur lors de la mise à jour du message:', data);
-                            }
-                        }).catch(error => {
-                            console.error('Erreur lors de la mise à jour du message:', error);
-                        });
-                    });
-
-                    // Gestion du blur de l'input pour supprimer le formulaire si nécessaire
-                    postInput.addEventListener('blur', function() {
-                        setTimeout(() => {
-                            if (!postForm.contains(document.activeElement)) {
-                                postContentElement.style.display = 'inline';
-                                postForm.remove();
-                            }
-                        }, 200);
-                    });
-                } else {
-                    console.error(`Element with class 'text' not found in post-${postId}.`);
-                }
-            } else {
-                console.error(`Element with ID 'post-${postId}' not found.`);
-            }
+                // Afficher le formulaire d'édition et masquer le texte actuel
+                textElement.style.display = "none";
+                editForm.style.display = "block";
+            });
         });
     });
-});
 </script>
+
 
