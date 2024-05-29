@@ -20,7 +20,7 @@ $topics=$result["data"]['topic'];
                     <p><a href="index.php?ctrl=forum&action=openTopicByID&id=<?= $topic->getId() ?>"><?= $topic->getTitle() ?></a></p>
                 </div>
             <?php endforeach?>
-</div>
+        </div>
     </div>
     
     <div class="welcomeForm">

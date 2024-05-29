@@ -118,11 +118,17 @@ class SecurityController extends AbstractController {
             }
         }
         public static function logout(){
+            $topicManager = new TopicManager();
+            $topics=$topicManager->findFeaturedTopics();
             Session::destroy();
             Session::addFlash("success", "Vous êtes déconnecté");
             return [
                 "view" => VIEW_DIR. "home.php",
-                "meta_description" => "Login Form"
+                "meta_description" => "Login Form",
+                "data"=>[
+                    "topic" => $topics
+                ]
+            
             ];
         }
 
